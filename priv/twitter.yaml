@@ -1,0 +1,209 @@
+---
+info:
+  version: '1.0'
+definitions:
+  User:
+    description: |
+      An object representing a user
+
+      THis is multiline
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        description: The user name
+        type: string
+      bio:
+        description: The user name
+        type: string
+      avatar: 
+        description: The user name
+        type: string
+    required:
+    - id
+    - name
+    - bio
+    - avatar
+
+  Tweet:
+    type: object
+    description: A tweet
+    properties:
+      id:
+        type: string
+        format: uuid
+      body:
+        type: string
+      media:
+        type: array
+        items:
+        - "$ref": "#/definitions/Media"
+    required: 
+    - id
+    - body
+  
+  Media:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      url:
+        type: string
+      altText:
+        type: string
+
+  ErrorMessage:
+    type: object
+    properties:
+      message:
+        type: string
+      helpUrl:
+        type: string
+    required:
+    - message
+
+connect:
+  params:
+    type: object
+    properties:
+      user_id:
+        type: string
+    required:
+    - user_id
+channels:
+  feed:{user_id}:
+    description: |
+      The feed channel
+    join:
+      replies:
+        ok: {}
+        error:
+          "$ref": "#/definitions/ErrorMessage"
+    messages:
+      tweet:create:
+        payload:
+          type: object
+          properties:
+            body:
+              type: string
+            media_ids:
+              type: array
+              items:
+              - string
+          required:
+          - body
+        replies:
+          ok:
+            "$ref": "#/definitions/Tweet" 
+          error:
+            "$ref": "#/definitions/ErrorMessage"
+
+      tweet:delete:
+        payload:
+          type: object
+          properties:
+            id:
+              type: string
+          required:
+          - id
+        replies:
+          ok:
+            type: string
+          error:
+            "$ref": "#/definitions/ErrorMessage"
+
+      tweet:request_presigned_media_upload:
+        replies:
+          ok:
+            type: object
+            properties:
+              presigned_url:
+                description: |
+                  This is the presigned url as returned by AWS
+
+                  Check the AWS client docs for info on how to use it
+                type: string
+            required:
+            - presigned_url
+          error:
+            "$ref": "#/definitions/ErrorMessage"
+
+      tweet:media_upload_finished:
+        replies:
+          ok:
+            "$ref": "#/definitions/Media"
+          error:
+            "$ref": "#/definitions/ErrorMessage"
+    subscriptions:
+      feed_update:
+        type: object
+        properties:
+          tweets:
+            type: array
+            items:
+            - "$ref": "#/definitions/Tweet"
+        required:
+        - tweets
+
+  user:{user_id}:
+    join:
+      replies:
+        ok: {}
+        error:
+          "$ref": "#/definitions/ErrorMessage"
+    messages:
+      user:follow:
+        payload:
+          type: object
+          properties:
+            user_id:
+              type: string
+          required:
+          - user_id
+        replies:
+          ok:
+            type: string
+          error:
+            "$ref": "#/definitions/ErrorMessage"
+
+      user:unfollow:
+        payload:
+          type: object
+          properties:
+            user_id:
+              type: string
+          required:
+          - user_id
+        replies:
+          ok:
+            type: string
+          error:
+            "$ref": "#/definitions/ErrorMessage"
+
+    subscriptions:
+      new_follower:
+        type: object
+        properties:
+          user:
+            "$ref": "#/definitions/User"
+        required:
+        - user
+
+      tweet:reply:
+        type: object
+        properties:
+          tweet_id:
+            type: string
+        required:
+        - tweet_id
+      
+      tweet:like:
+        type: object
+        properties:
+          tweet_id:
+            type: string
+        required:
+        - tweet_id

@@ -1,0 +1,35 @@
+{
+  "info": {
+    "version": "1.0"
+  },
+  "definitions": {
+    "DatasetCreatePayload": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  "channels": {
+    "map:{map_id}": {
+      "messages": {
+        "dataset:create": {
+          "payload": {
+            "$ref": "#/definitions/DatasetCreatePayload"
+          },
+          "replies": {
+            "ok": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "notifications": {}
+    }
+  }
+}

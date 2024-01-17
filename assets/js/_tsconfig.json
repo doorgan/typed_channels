@@ -1,0 +1,4 @@
+{
+  "files": ["app.ts"],
+  "include": ["**/*.ts", "../../deps/**/*.js"]
+}
